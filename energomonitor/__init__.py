@@ -26,11 +26,11 @@ def create_app() -> Flask:
             "balance": 2,
             "alerts": 3,
         },
-        POSTGRES_HOST="localhost",
+        POSTGRES_HOST="dpg-d7aujakvjg8s73eo1qng-a.oregon-postgres.render.com",
         POSTGRES_PORT=5432,
-        POSTGRES_DB="KURS1",
-        POSTGRES_USER="postgres",
-        POSTGRES_PASSWORD="admin",
+        POSTGRES_DB="kurs1",
+        POSTGRES_USER="am",
+        POSTGRES_PASSWORD="fFoOSJBy34Myg0CDcUlLs8lWVQqx8Fgn",
         USE_INMEMORY_REPOSITORY=False,
     )
 
