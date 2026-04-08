@@ -1,0 +1,95 @@
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Отчетность</p>
+            <h3>Формирование и экспорт отчетов</h3>
+        </div>
+        <div class="report-actions">
+            <a class="ghost-button" href="{{ url_for('monitor.export_pdf') }}">Экспорт PDF</a>
+            <a class="ghost-button" href="{{ url_for('monitor.export_xls') }}">Экспорт Excel</a>
+        </div>
+    </div>
+    <div class="report-layout">
+        <form method="post" action="{{ url_for('monitor.create_report') }}" class="stack-form report-form-card">
+            <label class="field-group">
+                <input
+                    type="text"
+                    name="report_name"
+                    required
+                    minlength="4"
+                    maxlength="150"
+                    value="Сменный отчет по энергопотреблению"
+                >
+                <span class="field-hint">Введите название отчета для журнала, просмотра и выгрузки.</span>
+            </label>
+            <label class="field-group">
+                <select name="report_type" required>
+                    <option>Сменный</option>
+                    <option>Суточный</option>
+                    <option>Недельный</option>
+                    <option>Аналитический</option>
+                </select>
+                <span class="field-hint">Выберите тип отчета.</span>
+            </label>
+            <div class="row row-compact">
+                <label class="field-group">
+                    <input type="date" name="date_from" required>
+                    <span class="field-hint">Дата начала отчетного периода.</span>
+                </label>
+                <label class="field-group">
+                    <input type="date" name="date_to" required>
+                    <span class="field-hint">Дата окончания отчетного периода.</span>
+                </label>
+            </div>
+            <div class="row">
+                <label class="field-group">
+                    <select name="employee_id" required>
+                        {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.name }} - {{ employee.position }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Ответственный сотрудник, сформировавший отчет.</span>
+                </label>
+                <label class="field-group">
+                    <input
+                        type="text"
+                        name="report_purpose"
+                        required
+                        minlength="5"
+                        maxlength="255"
+                        value="Контроль энергопотребления оборудования цеха"
+                    >
+                    <span class="field-hint">Укажите назначение отчета своими словами.</span>
+                </label>
+            </div>
+            <span class="field-hint"></span>
+            <button type="submit">Сформировать отчет</button>
+        </form>
+        <div class="table-wrap compact">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Дата</th>
+                        <th>Просмотр</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                        <tr>
+                            <td>{{ report.name }}</td>
+                            <td>{{ report.report_type }}</td>
+                            <td>{{ report.generated_at }}</td>
+                            <td class="report-links">
+                                <a href="{{ url_for('monitor.report_detail', report_id=report.id) }}">Открыть</a>
+                                <a href="{{ url_for('monitor.report_pdf', report_id=report.id) }}">PDF</a>
+                                <a href="{{ url_for('monitor.report_xls', report_id=report.id) }}">Excel</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

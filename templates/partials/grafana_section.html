@@ -1,0 +1,20 @@
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Grafana</p>
+            <h3>Графики выводятся через панели Grafana</h3>
+        </div>
+        <div class="inline-note"></div>
+    </div>
+    <div class="grafana-grid">
+        {% for panel in grafana_panels %}
+            <article class="grafana-card">
+                <header>
+                    <strong>{{ panel.title }}</strong>
+                    <a href="{{ panel.src }}" target="_blank" rel="noreferrer">Открыть</a>
+                </header>
+                <iframe src="{{ panel.src }}" loading="lazy" title="{{ panel.title }}"></iframe>
+            </article>
+        {% endfor %}
+    </div>
+</section>

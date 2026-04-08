@@ -1,0 +1,345 @@
+<section class="panel registry-intro">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Справочник</p>
+            <h3>Ввод и регистрация данных</h3>
+        </div>
+    </div>
+</section>
+
+<section class="registry-shell">
+    <div class="registry-main">
+        <article class="panel registry-list-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Список оборудования</p>
+                    <h3>Существующие записи</h3>
+                </div>
+                <button
+                    type="button"
+                    class="circle-action"
+                    data-modal-open="equipment-create-modal"
+                    aria-controls="equipment-create-modal"
+                    aria-label="Добавить оборудование"
+                >
+                    +
+                </button>
+            </div>
+            <div class="table-wrap norms-table-wrap">
+                <table class="norms-table">
+                    <thead>
+                        <tr>
+                            <th>Наименование</th>
+                            <th>Серийный номер</th>
+                            <th>Цех</th>
+                            <th>Статус</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in equipment %}
+                            {% set workshop = (workshops | selectattr('id', 'equalto', item.workshop_id) | list | first) %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.serial_number }}</td>
+                                <td>{{ workshop.name if workshop else 'Не указан' }}</td>
+                                <td>{{ item.status }}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="table-action"
+                                        data-modal-open="equipment-modal-{{ item.id }}"
+                                        aria-controls="equipment-modal-{{ item.id }}"
+                                    >
+                                        Изменить
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel registry-list-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Список датчиков</p>
+                    <h3>Существующие записи</h3>
+                </div>
+                <button
+                    type="button"
+                    class="circle-action"
+                    data-modal-open="sensor-create-modal"
+                    aria-controls="sensor-create-modal"
+                    aria-label="Добавить датчик"
+                >
+                    +
+                </button>
+            </div>
+            <div class="table-wrap norms-table-wrap">
+                <table class="norms-table">
+                    <thead>
+                        <tr>
+                            <th>Модель</th>
+                            <th>Серийный номер</th>
+                            <th>Точка учета</th>
+                            <th>Статус</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sensor in sensors %}
+                            {% set point = (points | selectattr('id', 'equalto', sensor.point_id) | list | first) %}
+                            <tr>
+                                <td>{{ sensor.model }}</td>
+                                <td>{{ sensor.serial_number }}</td>
+                                <td>{{ point.name if point else 'Не указана' }}</td>
+                                <td>{{ sensor.status }}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="table-action"
+                                        data-modal-open="sensor-modal-{{ sensor.id }}"
+                                        aria-controls="sensor-modal-{{ sensor.id }}"
+                                    >
+                                        Изменить
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </div>
+
+    <aside class="registry-side">
+        <article class="panel form-panel registry-side-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Мониторинг</p>
+                    <h3>Ввод значения параметра</h3>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('monitor.create_reading') }}" class="stack-form">
+                <label class="field-group">
+                    <select name="sensor_id" required>
+                        {% for sensor in sensors %}
+                            <option value="{{ sensor.id }}">{{ sensor.model }} - {{ sensor.serial_number }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Выберите датчик, с которого поступило измерение.</span>
+                </label>
+                <label class="field-group">
+                    <select name="equipment_id" required>
+                        {% for item in equipment %}
+                            <option value="{{ item.id }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Укажите оборудование, к которому относится показание.</span>
+                </label>
+                <label class="field-group">
+                    <input type="number" step="0.1" min="0" name="value" placeholder="Значение, кВт" required>
+                    <span class="field-hint">Числовое значение измерения в допустимом формате.</span>
+                </label>
+                <label class="field-group">
+                    <input type="datetime-local" name="timestamp" required>
+                    <span class="field-hint">Дата и время обязательны. Отрицательные значения не допускаются.</span>
+                </label>
+                <button type="submit">Проверить и сохранить</button>
+            </form>
+        </article>
+    </aside>
+</section>
+
+<div class="modal-backdrop" id="equipment-create-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="equipment-create-title">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">Добавление</p>
+                <h4 id="equipment-create-title">Добавить оборудование</h4>
+            </div>
+            <button type="button" class="modal-close" data-modal-close="equipment-create-modal" aria-label="Закрыть окно">&times;</button>
+        </div>
+        <form method="post" action="{{ url_for('monitor.create_equipment') }}" class="stack-form">
+            <label class="field-group">
+                <input type="text" name="name" placeholder="Наименование оборудования" minlength="3" maxlength="120" required>
+                <span class="field-hint">Например: Токарный станок 16К20.</span>
+            </label>
+            <label class="field-group">
+                <input type="text" name="serial_number" placeholder="Серийный номер" minlength="3" maxlength="50" required>
+                <span class="field-hint">Например: MC-1005.</span>
+            </label>
+            <div class="row row-compact">
+                <label class="field-group">
+                    <select name="workshop_id" required>
+                        {% for workshop in workshops %}
+                            <option value="{{ workshop.id }}">{{ workshop.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Выберите цех размещения.</span>
+                </label>
+                <label class="field-group">
+                    <input type="date" name="installed_at" required>
+                    <span class="field-hint">Дата ввода в эксплуатацию.</span>
+                </label>
+            </div>
+            <label class="field-group">
+                <select name="status">
+                    <option value="active">В работе</option>
+                    <option value="warning">На обслуживании</option>
+                    <option value="critical">Неисправно</option>
+                </select>
+                <span class="field-hint">Текущее техническое состояние объекта.</span>
+            </label>
+            <label class="field-group">
+                <textarea name="passport_data" placeholder="Паспортные данные оборудования" maxlength="500"></textarea>
+                <span class="field-hint">Основные характеристики, мощность, модель, производитель.</span>
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="ghost-button modal-cancel" data-modal-close="equipment-create-modal">Отмена</button>
+                <button type="submit">Добавить оборудование</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="sensor-create-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sensor-create-title">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">Добавление</p>
+                <h4 id="sensor-create-title">Добавить датчик</h4>
+            </div>
+            <button type="button" class="modal-close" data-modal-close="sensor-create-modal" aria-label="Закрыть окно">&times;</button>
+        </div>
+        <form method="post" action="{{ url_for('monitor.create_sensor') }}" class="stack-form">
+            <label class="field-group">
+                <input type="text" name="serial_number" placeholder="Серийный номер датчика" minlength="3" maxlength="50" required>
+                <span class="field-hint">Например: 70008 или SN-7008.</span>
+            </label>
+            <label class="field-group">
+                <input type="text" name="model" placeholder="Модель датчика" minlength="2" maxlength="80" required>
+                <span class="field-hint">Укажите модель счетчика или измерительного прибора.</span>
+            </label>
+            <div class="row row-compact">
+                <label class="field-group">
+                    <input type="text" name="manufacturer" placeholder="Производитель" minlength="2" maxlength="80" required>
+                    <span class="field-hint">Например: ОВЕН, Mercury, Eastron.</span>
+                </label>
+                <label class="field-group">
+                    <input type="text" name="network_address" placeholder="Сетевой адрес" minlength="3" maxlength="80" required>
+                    <span class="field-hint">Например: 10.0.0.15.</span>
+                </label>
+            </div>
+            <div class="row row-compact">
+                <label class="field-group">
+                    <select name="protocol">
+                        <option>Modbus</option>
+                        <option>MQTT</option>
+                    </select>
+                    <span class="field-hint">Протокол передачи данных.</span>
+                </label>
+                <label class="field-group">
+                    <select name="point_id">
+                        {% for point in points %}
+                            <option value="{{ point.id }}">{{ point.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Точка учета, к которой подключен датчик.</span>
+                </label>
+            </div>
+            <label class="field-group">
+                <select name="status">
+                    <option value="online">Активен</option>
+                    <option value="warning">На поверке</option>
+                    <option value="offline">Неактивен</option>
+                </select>
+                <span class="field-hint">Состояние канала связи и прибора.</span>
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="ghost-button modal-cancel" data-modal-close="sensor-create-modal">Отмена</button>
+                <button type="submit">Добавить датчик</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for item in equipment %}
+    <div class="modal-backdrop" id="equipment-modal-{{ item.id }}" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title-{{ item.id }}">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Редактирование</p>
+                    <h4 id="equipment-modal-title-{{ item.id }}">Изменение карточки оборудования</h4>
+                </div>
+                <button type="button" class="modal-close" data-modal-close="equipment-modal-{{ item.id }}" aria-label="Закрыть окно">&times;</button>
+            </div>
+            <form method="post" action="{{ url_for('monitor.update_equipment', equipment_id=item.id) }}" class="stack-form">
+                <input type="text" name="name" value="{{ item.name }}" required>
+                <input type="text" name="serial_number" value="{{ item.serial_number }}" required>
+                <div class="row row-compact">
+                    <select name="workshop_id" required>
+                        {% for workshop in workshops %}
+                            <option value="{{ workshop.id }}" {% if workshop.id == item.workshop_id %}selected{% endif %}>{{ workshop.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="date" name="installed_at" value="{{ item.installed_at or '' }}" required>
+                </div>
+                <select name="status">
+                    <option value="active" {% if item.status == 'active' %}selected{% endif %}>В работе</option>
+                    <option value="warning" {% if item.status == 'warning' %}selected{% endif %}>На обслуживании</option>
+                    <option value="critical" {% if item.status == 'critical' %}selected{% endif %}>Неисправно</option>
+                </select>
+                <textarea name="passport_data" maxlength="500"></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="ghost-button modal-cancel" data-modal-close="equipment-modal-{{ item.id }}">Отмена</button>
+                    <button type="submit">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endfor %}
+
+{% for sensor in sensors %}
+    <div class="modal-backdrop" id="sensor-modal-{{ sensor.id }}" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sensor-modal-title-{{ sensor.id }}">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Редактирование</p>
+                    <h4 id="sensor-modal-title-{{ sensor.id }}">Изменение карточки датчика</h4>
+                </div>
+                <button type="button" class="modal-close" data-modal-close="sensor-modal-{{ sensor.id }}" aria-label="Закрыть окно">&times;</button>
+            </div>
+            <form method="post" action="{{ url_for('monitor.update_sensor', sensor_id=sensor.id) }}" class="stack-form">
+                <input type="text" name="serial_number" value="{{ sensor.serial_number }}" required>
+                <input type="text" name="model" value="{{ sensor.model }}" required>
+                <div class="row row-compact">
+                    <input type="text" name="manufacturer" value="{{ sensor.manufacturer }}" required>
+                    <input type="text" name="network_address" value="{{ sensor.network_address }}" required>
+                </div>
+                <div class="row row-compact">
+                    <select name="protocol">
+                        <option {% if sensor.protocol == 'Modbus' %}selected{% endif %}>Modbus</option>
+                        <option {% if sensor.protocol == 'MQTT' %}selected{% endif %}>MQTT</option>
+                    </select>
+                    <select name="point_id" required>
+                        {% for point in points %}
+                            <option value="{{ point.id }}" {% if point.id == sensor.point_id %}selected{% endif %}>{{ point.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <select name="status">
+                    <option value="online" {% if sensor.status == 'online' %}selected{% endif %}>Активен</option>
+                    <option value="warning" {% if sensor.status == 'warning' %}selected{% endif %}>На поверке</option>
+                    <option value="offline" {% if sensor.status == 'offline' %}selected{% endif %}>Неактивен</option>
+                </select>
+                <div class="modal-actions">
+                    <button type="button" class="ghost-button modal-cancel" data-modal-close="sensor-modal-{{ sensor.id }}">Отмена</button>
+                    <button type="submit">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endfor %}

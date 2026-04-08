@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ЭнергоМонитор</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar__top">
+                <div class="site-brand">
+                    <p class="eyebrow">АС предприятия</p>
+                    <h1>ЭнергоМонитор</h1>
+                    <p class="subtitle">Модуль мониторинга энергопотребления для производственного цеха.</p>
+                </div>
+                <nav class="side-nav" aria-label="Основная навигация">
+                    <a href="{{ url_for('monitor.dashboard') }}" class="{% if active_page == 'overview' %}is-active{% endif %}">Главная</a>
+                    <a href="{{ url_for('monitor.monitoring_page') }}" class="{% if active_page == 'monitoring' %}is-active{% endif %}">Мониторинг</a>
+                    <a href="{{ url_for('monitor.registry_page') }}" class="{% if active_page == 'registry' %}is-active{% endif %}">Справочники</a>
+                    <a href="{{ url_for('monitor.norms_page') }}" class="{% if active_page == 'norms' %}is-active{% endif %}">Нормативы</a>
+                    <a href="{{ url_for('monitor.reports_page') }}" class="{% if active_page == 'reports' %}is-active{% endif %}">Отчеты</a>
+                </nav>
+            </div>
+            <div class="sidebar__bottom">
+                <a href="{{ url_for('monitor.dashboard') }}" class="exit-link">Выход</a>
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <header class="workspace-header">
+                <div class="workspace-title">
+                    <p class="eyebrow">Панель сотрудника</p>
+                    <strong>
+                        {% if active_page == "overview" %}Главная{% endif %}
+                        {% if active_page == "monitoring" %}Мониторинг оборудования{% endif %}
+                        {% if active_page == "registry" %}Ввод и регистрация данных{% endif %}
+                        {% if active_page == "norms" %}Контроль нормативов{% endif %}
+                        {% if active_page == "reports" %}Отчетность и статистика{% endif %}
+                    </strong>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__avatar">АМ</div>
+                    <div>
+                        <strong>А.И. Мухамедьяров</strong>
+                        <span>Администратор</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-stack" role="status" aria-live="polite">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}">
+                                    <span class="flash__text">{{ message }}</span>
+                                    <button type="button" class="flash__close" aria-label="Закрыть уведомление">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="site-footer">
+                <span>Автор программы: А.И. Мухамедьяров</span>
+                <span>ЭнергоМонитор • программный комплекс</span>
+            </footer>
+        </div>
+    </div>
+
+    <div class="help-widget">
+        <aside class="help-panel" id="help-panel" hidden aria-labelledby="help-panel-title">
+            <div class="help-panel__header">
+                <div>
+                    <p class="help-panel__eyebrow">Справка</p>
+                    <h2 id="help-panel-title">Как пользоваться программой</h2>
+                </div>
+                <button type="button" class="help-panel__close" aria-label="Закрыть справку" data-help-close>&times;</button>
+            </div>
+            <div class="help-panel__content">
+                <section class="help-panel__section">
+                    <h3>Главная</h3>
+                    <p>На главной странице отображаются ключевые показатели, текущая нагрузка, уведомления и графики.</p>
+                </section>
+                <section class="help-panel__section">
+                    <h3>Справочники</h3>
+                    <p>Добавляйте оборудование, датчики и показания. При ошибочном формате система выдаст сообщение и не сохранит данные.</p>
+                </section>
+                <section class="help-panel__section">
+                    <h3>Нормативы и отчеты</h3>
+                    <p>В разделе нормативов задаются допустимые границы, а в отчетах формируется статистика и экспорт файлов.</p>
+                </section>
+            </div>
+        </aside>
+        <button type="button" class="help-fab" aria-label="Открыть справку" aria-controls="help-panel" aria-expanded="false">
+            <span>?</span>
+        </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

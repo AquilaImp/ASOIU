@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Отчет</p>
+            <h3>{{ report_payload.name }}</h3>
+        </div>
+        <div class="report-actions">
+            <a class="ghost-button" href="{{ url_for('monitor.report_pdf', report_id=report_meta.id) }}">PDF</a>
+            <a class="ghost-button" href="{{ url_for('monitor.report_xls', report_id=report_meta.id) }}">Excel</a>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <article class="metric-card">
+            <span>Тип отчета</span>
+            <strong>{{ report_payload.report_type }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Период</span>
+            <strong>{{ report_payload.period_label }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Сформировал</span>
+            <strong>{{ report_payload.employee_name }}</strong>
+        </article>
+        <article class="metric-card accent">
+            <span>Дата создания</span>
+            <strong>{{ report_payload.generated_at }}</strong>
+        </article>
+    </div>
+
+    <div class="two-column">
+        <article class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Сводка</p>
+                    <h3>Показатели отчета</h3>
+                </div>
+            </div>
+            <div class="balance-grid">
+                <div><span>Нагрузка за период</span><strong>{{ report_payload.summary.total_power }} кВт</strong></div>
+                <div><span>Среднее значение</span><strong>{{ report_payload.summary.average_consumption }} кВт</strong></div>
+                <div><span>Загрузка по нормам</span><strong>{{ report_payload.summary.utilization }} %</strong></div>
+                <div><span>Отклонения</span><strong>{{ report_payload.summary.alerts }}</strong></div>
+                <div><span>Приход</span><strong>{{ report_payload.summary.incoming }} кВт</strong></div>
+                <div><span>Расход</span><strong>{{ report_payload.summary.consumption }} кВт</strong></div>
+                <div><span>Потери</span><strong>{{ report_payload.summary.losses }} кВт</strong></div>
+                <div><span>Критические записи</span><strong>{{ report_payload.summary.critical_runtime_hours }}</strong></div>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Выводы</p>
+                    <h3>Краткое содержание отчета</h3>
+                </div>
+            </div>
+            <div class="mini-list">
+                <div><span>Тип</span><strong>{{ report_payload.report_type }}</strong></div>
+                <div><span>Период наблюдения</span><strong>{{ report_payload.period_label }}</strong></div>
+                <div><span>Ответственный</span><strong>{{ report_payload.employee_name }}</strong></div>
+                <div><span>Всего записей</span><strong>{{ report_payload.total_rows }}</strong></div>
+            </div>
+            <div class="report-insights">
+                {% for item in report_payload.highlights %}
+                    <p>{{ item }}</p>
+                {% endfor %}
+            </div>
+        </article>
+    </div>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Детализация</p>
+                <h3>{{ report_payload.detail_title }}</h3>
+            </div>
+        </div>
+        {% if report_payload.rows %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Оборудование</th>
+                            <th>Цех</th>
+                            <th>Точка учета</th>
+                            <th>Значение</th>
+                            <th>Статус</th>
+                            <th>Время</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in report_payload.rows %}
+                            <tr>
+                                <td>{{ item.equipment_name }}</td>
+                                <td>{{ item.workshop_name }}</td>
+                                <td>{{ item.point_name }}</td>
+                                <td>{{ item.value }} {{ item.unit }}</td>
+                                <td>{{ item.validation_status }}</td>
+                                <td>{{ item.timestamp }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <strong>За выбранный период нет сохраненных показаний.</strong>
+                <p>Выберите другой интервал или добавьте показания в журнал мониторинга, после чего сформируйте отчет повторно.</p>
+            </div>
+        {% endif %}
+    </article>
+</section>
+{% endblock %}

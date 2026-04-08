@@ -1,0 +1,74 @@
+{% macro badge(status) -%}
+    <span class="badge badge-{{ status }}">{{ status }}</span>
+{%- endmacro %}
+
+<section class="two-column">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Мониторинг</p>
+                <h3>Последние валидированные показания</h3>
+            </div>
+            <form method="get" class="filter-form">
+                <select name="workshop_id">
+                    <option value="">Все цеха</option>
+                    {% for workshop in workshops %}
+                        <option value="{{ workshop.id }}" {% if selected_workshop_id == workshop.id %}selected{% endif %}>{{ workshop.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Фильтровать</button>
+            </form>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Оборудование</th>
+                        <th>Цех</th>
+                        <th>Точка учета</th>
+                        <th>Значение</th>
+                        <th>Норма</th>
+                        <th>Статус</th>
+                        <th>Время</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in latest_readings %}
+                        <tr>
+                            <td>{{ item.equipment_name }}</td>
+                            <td>{{ item.workshop_name }}</td>
+                            <td>{{ item.point_name }}</td>
+                            <td>{{ item.value }} {{ item.unit }}</td>
+                            <td>
+                                {% if item.norm %}
+                                    {{ item.norm.min_value }} - {{ item.norm.max_value }} {{ item.norm.unit }}
+                                {% else %}
+                                    Не задана
+                                {% endif %}
+                            </td>
+                            <td>{{ badge(item.validation_status) }}</td>
+                            <td>{{ item.timestamp }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+    <article class="panel alerts-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Уведомления</p>
+                <h3>Сбои и аномалии</h3>
+            </div>
+        </div>
+        <div class="alerts-list">
+            {% for alert in alerts %}
+                <article class="alert alert-{{ alert.level }}">
+                    <strong>{{ alert.equipment_name }}</strong>
+                    <p>{{ alert.message }}</p>
+                    <small>{{ alert.workshop_name }} - {{ alert.timestamp }}</small>
+                </article>
+            {% endfor %}
+        </div>
+    </article>
+</section>

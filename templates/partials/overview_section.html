@@ -1,0 +1,79 @@
+<section class="hero">
+    <div>
+        <p class="eyebrow">Оперативная панель</p>
+        <h2>Контроль цехового энергопотребления в одном интерфейсе</h2>
+        <p class="hero-text">Приложение работает с базой PostgreSQL KURS: оборудование, точки учета, датчики, показания, нормы и отчеты читаются из реальной структуры данных.</p>
+    </div>
+    <div class="hero-meta">
+        <div class="meta-card">
+            <span>Обновлено</span>
+            <strong>{{ current_time }}</strong>
+        </div>
+        <div class="meta-card">
+            <span>Текущая нагрузка</span>
+            <strong>{{ dashboard.total_power }} кВт</strong>
+        </div>
+        <div class="meta-card">
+            <span>Загрузка по нормам</span>
+            <strong>{{ dashboard.utilization }}%</strong>
+        </div>
+    </div>
+</section>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <span>Цехов</span>
+        <strong>{{ dashboard.counts.workshops }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>Оборудования</span>
+        <strong>{{ dashboard.counts.equipment }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>Датчиков</span>
+        <strong>{{ dashboard.counts.sensors }}</strong>
+    </article>
+    <article class="metric-card accent">
+        <span>Уведомлений</span>
+        <strong>{{ dashboard.counts.alerts }}</strong>
+    </article>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Статусы</p>
+                <h3>Состояние оборудования</h3>
+            </div>
+        </div>
+        <div class="status-grid">
+            {% for item in equipment %}
+                <div class="status-tile status-{{ item.status }}">
+                    <strong>{{ item.name }}</strong>
+                    <span>{{ item.serial_number }}</span>
+                    <small>Монтаж: {{ item.installed_at or 'не указано' }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Баланс</p>
+                <h3>Расчет приход-расход</h3>
+            </div>
+        </div>
+        <div class="balance-grid">
+            <div><span>Приход</span><strong>{{ dashboard.balance.incoming }} кВт</strong></div>
+            <div><span>Расход</span><strong>{{ dashboard.balance.consumption }} кВт</strong></div>
+            <div><span>Потери</span><strong>{{ dashboard.balance.losses }} кВт</strong></div>
+            <div><span>Часы в критике</span><strong>{{ dashboard.critical_runtime_hours }}</strong></div>
+        </div>
+        <div class="mini-list">
+            {% for workshop_name, value in dashboard.workshop_totals.items() %}
+                <div><span>{{ workshop_name }}</span><strong>{{ value|round(1) }} кВт</strong></div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
